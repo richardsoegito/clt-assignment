@@ -1,155 +1,284 @@
-# Feature Test Assignment
+# CLT Assignment - Richard Soegito
 
-## 1. Instructions
+## 📌 Overview
 
-- Clone or fork this repository.
-- Create a new branch: `{user}-assignment`.
-- Invite **@ikhsan017** and **@dhiaaziz** as collaborators.
-- Follow the setup instructions provided in the repository before running the project.
+This project implements a hierarchical data structure:
 
-## 2. Feature Requirements
+**Supplier → Layups → Layers**
 
-### Core Features (Main Criteria)
+Each Supplier can have multiple Layups, and each Layup contains multiple Layers.
 
-- [ ] CRUD Suppliers
-- [ ] CRUD CLT Layups (nested under Supplier)
-- [ ] CRUD CLT Layers (nested under Layup)
+The application provides:
 
-The structure should properly reflect the hierarchy:
-Supplier → Layups → Layers
+* Full CRUD functionality
+* Import / Export system
+* Conflict detection & resolution (including UI-based manual resolution)
 
-### Data Model (ERD)
+---
 
-Below is the Entity Relationship Diagram (ERD) representing the data structure:
+## 🧱 Data Structure
 
-![ERD](./erd-new.png)
+Supplier
+└── Layups
+└── Layers
 
-### Import / Export (Main Criteria)
+### Relationship:
 
-- [ ] **Export by Supplier**
-    - Must include: Supplier + all related Layups + all related Layers
+* Supplier hasMany Layups
+* Layup hasMany Layers
 
-- [ ] **Import by Supplier**
-    - Must create and/or update Layups and Layers under the specified supplier
+---
 
-Format is flexible (JSON / CSV / Excel, etc.). JSON format is completely acceptable.
+## ⚙️ Setup Instructions
 
-## 3. Feature: Conflict Resolution (Bonus – Important)
+### 1. Clone Repository
 
-During import, conflicts may occur when incoming data differs from existing records.
+```bash
+git clone https://github.com/richardsoegito/clt-assignment.git
+cd clt-assignment
+git checkout richard-assignment
+```
 
-### Conflict Detection Rules
+### 2. Install Dependencies
 
-#### 1. Layup-Level Conflict
+```bash
+composer install
+npm install
+```
 
-If a layup with the same `name` already exists under the same supplier:
+### 3. Environment Setup
 
-- Treat it as the same layup candidate.
-- Do **not** automatically create a new layup.
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-#### 2. Layer-Level Conflict
+### 4. Database
+
+```bash
+php artisan migrate
+```
+
+### 5. Run Application
+
+```bash
+php artisan serve
+```
+
+---
+
+## 🚀 Features
+
+### ✅ CRUD Features
+
+#### Supplier
+
+* Create Supplier
+* Edit Supplier
+* Delete Supplier
+
+#### Layups (Nested under Supplier)
+
+* Create Layup
+* Edit Layup
+* Delete Layup
+
+#### Layers (Nested under Layup)
+
+* Create Layer
+* Edit Layer
+* Delete Layer
+
+---
+
+## 📤 Export Features
+
+### Export by Supplier
+
+Exports:
+
+* Supplier
+* All related Layups
+* All related Layers
+
+### Export by Layup
+
+Exports:
+
+* Layup
+* All related Layers
+
+### Export by Layer
+
+Exports:
+
+* Single Layer data
+
+---
+
+## 📥 Import Features
+
+### Import by Supplier
+
+* Accepts JSON input
+* Automatically:
+
+  * Creates new Layups
+  * Creates new Layers
+  * Updates existing Layers (depending on strategy)
+
+---
+
+## ⚠️ Conflict Detection Rules
+
+### 1. Layup-Level
 
 If:
 
-- A layer with the same `layer_order` exists within that layup,
-- **AND** one or more fields differ (`thickness`, `width`, `angle`),
+* Layup name already exists under the same supplier
 
-→ This must be treated as a conflict.
-
----
-
-### Required Conflict Handling
-
-You must implement a clearly defined conflict resolution strategy.
-
-At minimum, support **one** of the following:
-
-- **Overwrite Existing**  
-  (Incoming data replaces current data)
-
-- **Skip Conflict**  
-  (Keep current data, ignore incoming change)
-
-- **Duplicate Layup**  
-  (Create a new layup with a suffix such as `name (imported)`)
-
-- **Reject Entire Import**  
-  (Abort and return a detailed conflict report)
+➡️ Treated as the same Layup (NOT duplicated)
 
 ---
 
-### Advanced Conflict Resolution (UI-Based – Bonus)
+### 2. Layer-Level
 
-For additional bonus points, implement a **manual conflict resolution interface** similar to GitHub merge conflict resolution.
+If:
 
-Expected behavior:
+* Same `layer_order` exists
+* BUT values differ (`thickness`, `width`, `angle`)
 
-- Display **Existing Version (Current Data)** and  
-  **Incoming Version (Imported Data)** side-by-side
-- Highlight field-level differences
-- Allow the user to choose:
-    - ✅ Keep Existing
-    - ✅ Accept Incoming
-- Support resolving conflicts one-by-one
-- Provide navigation (e.g., “1 of 3 discrepancies”)
+➡️ This is considered a **CONFLICT**
 
-This may be implemented as:
+---
 
-- A modal, or
-- A dedicated conflict resolution page.
+## 🔥 Conflict Resolution Strategies
 
-## 4. Design Reference
+### 1. Overwrite
 
-A design reference is available in Figma:
+* Incoming data replaces existing data
 
-[Figma Design File](https://www.figma.com/design/odWJ887r00aslmSFPIHMCx/SPEC-Toolbox---Feature-Test?node-id=11001-35&t=XUggOaUUi9p8jGFG-1)
+### 2. Skip
 
-> The design is for reference only. Exact visual matching is not required.
+* Existing data is preserved
+* Incoming data ignored
 
-## 5. Evaluation Criteria
+### 3. Manual Resolve (UI-Based) ⭐
 
-### Main Evaluation
+* Displays:
 
-- Correct implementation of the required features
+  * Existing Data vs Incoming Data
+* Highlights differences (in red)
+* User can choose:
 
-### Bonus Evaluation
+  * ✅ Keep Existing
+  * ✅ Accept Incoming
+* Resolve conflicts one-by-one
 
-**Architecture & Design Patterns**
+---
 
-- Use Repository and/or Service pattern
-- Bind interfaces via a Service Provider
+## 🖥️ Conflict Resolution UI
 
-**Laravel Best Practices**
+Features:
 
-- Form Request validation
-- Policies or Gates for authorization
-- Proper use of Route Model Binding
-- Clean, maintainable code following Laravel conventions
+* Side-by-side comparison
+* Highlighted differences (red text)
+* Action buttons:
 
-**Automated Testing**
+  * Keep Existing
+  * Accept Incoming
+* Dynamic conflict count
 
-- Unit tests (validation, services, repositories)
-- Feature tests (CRUD and import/export flows)
+---
 
-**Additional Improvements**
+## 🧪 Example Import JSON
 
-- Any meaningful enhancements will be considered positively
+### Normal Import
 
-## 6. Submission
+```json
+{
+  "layups": [
+    {
+      "name": "Layup Alpha",
+      "layers": [
+        {
+          "layer_order": 1,
+          "thickness": 50,
+          "width": 100,
+          "angle": 0
+        }
+      ]
+    }
+  ]
+}
+```
 
-The deadline will be provided via email.  
-Please ensure submission within the specified timeframe.
+---
 
+### Conflict Example
 
-## 7. Demo
+```json
+{
+  "layups": [
+    {
+      "name": "Layup Alpha",
+      "layers": [
+        {
+          "layer_order": 1,
+          "thickness": 999,
+          "width": 999,
+          "angle": 999
+        }
+      ]
+    }
+  ]
+}
+```
 
-Include one of the following with your submission:
+---
 
-- A demo video (recommended), or
-- A live project link
+## 🎥 Demo Video
 
-Ensure the demo clearly showcases:
+👉 https://your-video-link-here
 
-- CRUD functionality
-- Import / Export feature
-- Conflict resolution behavior
+---
+
+## 🧠 Technical Approach
+
+* Nested Resource Routing (Laravel)
+* Eloquent Relationships
+* Session-based Conflict Handling
+* Dynamic UI Rendering for conflicts
+
+---
+
+## 🛠 Tech Stack
+
+* Laravel
+* MySQL
+* Tailwind CSS
+
+---
+
+## 📌 Notes
+
+* Designed to follow Laravel best practices
+* Conflict resolution inspired by Git merge behavior
+* Clean and modular controller logic
+* Scalable structure for future improvements
+
+---
+
+## 🔍 Possible Improvements
+
+* Repository Pattern implementation
+* Service Layer abstraction
+* Automated Testing (Unit & Feature)
+* Upload file import (CSV / Excel)
+* Pagination for large datasets
+
+---
+
+## 👨‍💻 Author
+
+Richard Soegito
